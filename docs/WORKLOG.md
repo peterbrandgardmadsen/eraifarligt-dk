@@ -298,3 +298,43 @@ regulering 54 · arbejdsmarked 44 · misinformation 41.
   should land near the 140 cap. Worth re-running July with `--overskriv` after
   a few weeks of harvest to see how much the thin pool distorted it.
 - No unit tests yet.
+
+---
+
+## 2026-08-21 — Session 1, part 5: The tense problem
+
+Peter spotted it: the page asked "Er AI farligt i juli 2026?" while being read in
+August. Worth writing down properly, because it is a design flaw and not a typo.
+
+**The mismatch.** The domain asks a present-tense question. The page answered a
+past-tense one. Calendar-month batching means the answer on screen is between
+one and eight weeks behind the question a visitor is asking.
+
+**2025 had the identical lag but concealed it.** The old page printed only
+"Senest opdateret: 3. august" and never named the period it covered, so it read
+as current. Naming the month is the more honest choice — it just makes an
+existing problem visible rather than creating a new one.
+
+**Note on the calendar-month unit itself:** it exists because n8n had a monthly
+trigger in 2025, not because the question requires it. Nothing in the Python
+pipeline depends on it. A rolling 30-day window recomputed weekly would remove
+the lag almost entirely and costs about $0.90/month instead of $0.18. Peter chose
+to keep monthly and fix the framing — recorded here so the option is on the shelf
+rather than forgotten.
+
+### Changes
+
+- **Front page** now asks "Er AI farligt?" in present tense, with
+  "Seneste hele måned: **juli 2026**" underneath and
+  "Næste vurdering: 1. september 2026" in the footer of the verdict card.
+- **Archive pages** keep "Er AI farligt i juli 2026?" — retrospective framing is
+  correct there, since those pages *are* historical.
+- **`om.html`** states the lag outright in the caveats list: read the site on the
+  28th and the answer may be eight weeks old, and that this is the price of using
+  completed months as the unit.
+- New `naeste_vurdering()` helper in `render.py`: a month's verdict publishes on
+  the 1st of the following month, so the *next* verdict falls two months after
+  the month displayed.
+
+Note the current page shows "opgjort 21. august" for July only because the test
+run happened mid-month. Under the cron it will read "opgjort 1. august".

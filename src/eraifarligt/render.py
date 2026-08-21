@@ -40,6 +40,19 @@ def naeste_maaned(maaned: str) -> str:
     return f"{aar + 1}-01" if md == 12 else f"{aar}-{md + 1:02d}"
 
 
+def naeste_vurdering(maaned: str) -> str:
+    """Hvornår den efterfølgende vurdering udgives, som '1. september 2026'.
+
+    Vurderingen for en måned udgives den 1. i måneden efter. Den næste
+    vurdering falder derfor to måneder efter den måned der vises.
+    """
+    aar, md = (int(x) for x in naeste_maaned(maaned).split("-"))
+    md += 1
+    if md > 12:
+        md, aar = 1, aar + 1
+    return f"1. {MAANEDSNAVNE[md - 1]} {aar}"
+
+
 def _trend_svg(maaneder: list[dict], bredde: int = 720, hoejde: int = 220) -> str:
     """Inline SVG-graf over faresindekset. Ingen JavaScript, ingen eksterne kald."""
     if not maaneder:
@@ -114,6 +127,7 @@ def _env() -> Environment:
     )
     env.filters["dansk_maaned"] = dansk_maaned
     env.filters["dansk_dato"] = dansk_dato
+    env.filters["naeste_vurdering"] = naeste_vurdering
     return env
 
 

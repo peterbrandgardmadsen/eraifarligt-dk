@@ -9,8 +9,14 @@
 {% endif %}
 
 <section class="dom tone-{{ m.tone }}">
-  <p class="dom-sporgsmaal">Er AI farligt i {{ m.maaned|dansk_maaned }}?</p>
+  {# Forsiden stiller spørgsmålet i nutid, som domænet lover, og oplyser derefter
+     hvilken periode svaret dækker. Arkivsiderne er historiske og navngiver
+     måneden direkte. #}
+  <p class="dom-sporgsmaal">Er AI farligt{% if not er_forside %} i {{ m.maaned|dansk_maaned }}{% endif %}?</p>
   <p class="dom-svar">{{ m.bedoemmelse }}</p>
+  {% if er_forside %}
+  <p class="dom-periode">Seneste hele måned: <strong>{{ m.maaned|dansk_maaned }}</strong></p>
+  {% endif %}
   <p class="dom-indeks">
     Faresindeks <strong>{{ m.indeks }}</strong> af 100
     {% if m.aendring is not none %}
@@ -26,6 +32,9 @@
     {{ m.grundlag.antal_artikler }} artikler · {{ m.grundlag.antal_kilder }} kilder ·
     opgjort {{ m.genereret|dansk_dato }}
   </p>
+  {% if er_forside %}
+  <p class="dom-naeste">Næste vurdering: {{ m.maaned|naeste_vurdering }}</p>
+  {% endif %}
 </section>
 
 <section class="afsnit">
