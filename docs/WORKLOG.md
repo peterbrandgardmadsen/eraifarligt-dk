@@ -412,3 +412,63 @@ serving an untrusted certificate.
 3.12 and install five packages. If `PYTHON_VERSION` misbehaves, the fallback is to
 have `verdict.yml` build `site/` and commit it, leaving Netlify with an empty
 build command and `publish = "site"`. Nothing else would need to change.
+
+---
+
+## 2026-08-21 — Session 1, part 7: Live
+
+eraifarligt.dk now serves the 2026 pipeline. The August 2025 page, frozen for
+almost a year, is gone.
+
+### Deployed
+
+- Repo: **github.com/peterbrandgardmadsen/eraifarligt-dk** (public).
+- `ANTHROPIC_API_KEY` added as a GitHub Actions secret by Peter. It exists in
+  exactly one place; Netlify never sees it.
+- Netlify site repointed from `ai-verdict-site` to the new repo. Build succeeded
+  on the first attempt — `PYTHON_VERSION = "3.12"` worked, so the fallback of
+  committing a prebuilt `site/` was not needed.
+- Domain and certificate untouched, as intended. No downtime.
+
+Verified live: `/`, `/arkiv.html`, `/om.html`, `/maaned/2026-07.html` and
+`/static/style.css` all return 200; an unknown path returns 404; no occurrence of
+"n8n" remains in the served HTML.
+
+Front page reads: **Er AI farligt? → Måske**, seneste hele måned juli 2026,
+faresindeks 53.8, næste vurdering 1. september 2026.
+
+### CI proven, not assumed
+
+`harvest.yml` was dispatched manually and ran green: 1746 items from 23 feeds,
+7 new articles pooled, committed as `Høst 2026-08-21` and pushed. So the daily
+job, the commit step and the push permissions are all confirmed working rather
+than merely written.
+
+### Finding: Substack blocks GitHub's runners
+
+Import AI and Gary Marcus both returned **HTTP 403** from the Actions runner.
+Both fetch fine from Peter's home connection. Substack blocks datacenter IP
+ranges. Reddit — the source predicted to fail this way — worked fine.
+
+Consequences: two of 23 sources, both lowest-weight `kommentar` tier, will
+contribute nothing to any CI-run verdict. The failure is non-fatal by design,
+logged in the run and printed in the month's kildestatus table, so it degrades
+visibly rather than silently. **Left in place pending Peter's decision** — the
+options are to drop them, or to accept that they only contribute when a verdict
+is run from a workstation.
+
+### Next scheduled event
+
+**1 September 2026, 06:00 UTC.** `verdict.yml` fires with no `--maaned`, so
+`forrige_maaned()` resolves to `2026-08`, scored from a pool that by then will
+hold a full month of daily harvests rather than July's 41 articles. Both
+workflows share the `data-skrivning` concurrency group, so the 05:17 harvest and
+the 06:00 verdict queue instead of racing.
+
+### Still open
+
+- Substack 403 decision.
+- No unit tests. `beregn_indeks`, `bedoem`, the dedupe threshold and
+  `month_window` are the parts worth covering.
+- Worth re-running July with `--overskriv` once the pool is deep, to see how much
+  the 41-article basis skewed the first number.
