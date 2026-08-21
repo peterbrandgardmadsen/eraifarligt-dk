@@ -17,7 +17,7 @@
 
 **Live site (checked 2026-08-21):** https://eraifarligt.dk still serves the verdict dated **1. August 2025** (updated 3. August 2025). Verdict "Måske", 15 sources. So the pipeline has been dead for ~12 months.
 
-**Hosting:** GitHub Pages from `github.com/peterbrandgardmadsen/ai-verdict-site` (public, 42 commits). Repo root holds `index.html` plus stray files `verdict-july-2025.html`, `verdict-july-2025-1.html`, `verdict-july-2025-2.html`, `=verdict-july-2025.html` — the `=` prefix is a shell/naming accident. Custom domain eraifarligt.dk points at it.
+**Hosting:** `github.com/peterbrandgardmadsen/ai-verdict-site` (public, 42 commits) — but see the correction in part 6: the site is served by **Netlify**, not GitHub Pages. Repo root holds `index.html` plus stray files `verdict-july-2025.html`, `verdict-july-2025-1.html`, `verdict-july-2025-2.html`, `=verdict-july-2025.html` — the `=` prefix is a shell/naming accident. Custom domain eraifarligt.dk points at it.
 
 ### The 2025 architecture (from `Er AI Farligt_ final.json`)
 
@@ -352,3 +352,63 @@ rather than forgotten.
 
 Note the current page shows "opgjort 21. august" for July only because the test
 run happened mid-month. Under the cron it will read "opgjort 1. august".
+
+---
+
+## 2026-08-21 — Session 1, part 6: Correction — the site is on Netlify, not GitHub Pages
+
+Discovered while preparing to deploy. `curl -sI https://eraifarligt.dk` returns:
+
+```
+Server: Netlify
+Cache-Status: "Netlify Edge"
+```
+
+and the GitHub Pages API for `ai-verdict-site` reports `"cname": null` — no custom
+domain is configured there at all. DNS points at Netlify's edge
+(`35.157.26.135`, `63.176.8.218` and two IPv6 addresses).
+
+**So the 2025 chain was:** n8n → GitHub node writes `index.html` to
+`peterbrandgardmadsen/ai-verdict-site` → **Netlify** builds from that repo →
+served at eraifarligt.dk. GitHub Pages was also enabled on the repo but was never
+the thing serving the domain.
+
+This also explains an inconsistency noted in part 1 and left unresolved: the live
+site showed an **August 2025** verdict while the newest file in the GitHub repo
+was dated **31 July**. Different pipelines, different states.
+
+Earlier entries in this log and the README asserted GitHub Pages. That was an
+assumption from seeing the n8n GitHub node, never verified. Both corrected.
+
+### Deployment shape, decided
+
+| Where | Cadence | Does |
+|---|---|---|
+| `harvest.yml` | daily 05:17 UTC | fetches feeds, commits `data/raw` |
+| `verdict.yml` | 1st, 06:00 UTC | scores the month, commits `data/verdicts` |
+| Netlify (`netlify.toml`) | every push to `main` | builds `site/`, publishes |
+
+The split matters: **GitHub Actions never publishes, and Netlify never calls
+Anthropic.** Actions commits data; Netlify reacts to the commit and only ever
+reads `data/verdicts/`. The API key therefore lives in exactly one place —
+GitHub Actions secrets — and nothing at Netlify can leak it.
+
+Chosen over moving to GitHub Pages because the domain and its certificate stay
+untouched: no DNS edit, no propagation wait, no window where the site is down or
+serving an untrusted certificate.
+
+### Changes
+
+- Deleted `.github/workflows/deploy.yml` — Netlify owns publishing now.
+- Stripped the `configure-pages` / `upload-pages-artifact` / `deploy-pages` steps
+  and the `pages` / `id-token` permissions from `verdict.yml`; it now runs
+  `run --spring-build-over`, since building is Netlify's job.
+- `render.py` no longer writes `CNAME` or `.nojekyll` — both are GitHub Pages
+  artefacts.
+- Added `netlify.toml`: build command, `publish = "site"`, `PYTHON_VERSION 3.12`,
+  plus `nosniff` / `Referrer-Policy` headers and a week of cache on `/static/*`.
+
+**Risk to watch on the first Netlify build:** the build image must provide Python
+3.12 and install five packages. If `PYTHON_VERSION` misbehaves, the fallback is to
+have `verdict.yml` build `site/` and commit it, leaving Netlify with an empty
+build command and `publish = "site"`. Nothing else would need to change.

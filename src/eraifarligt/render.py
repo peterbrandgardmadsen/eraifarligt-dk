@@ -178,8 +178,8 @@ def render(cfg: Config, maaneder: list[dict], site_dir: Path | None = None) -> P
     if STATIC_DIR.exists():
         shutil.copytree(STATIC_DIR, ud / "static")
 
-    (ud / ".nojekyll").write_text("", encoding="utf-8")
-    (ud / "CNAME").write_text("eraifarligt.dk\n", encoding="utf-8")
+    # Ingen CNAME- eller .nojekyll-fil: sitet udgives af Netlify, som styrer
+    # domænet i sin egen konfiguration.
 
     log.info("Byggede site i %s (%d måneder)", ud, len(maaneder))
     return ud

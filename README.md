@@ -53,20 +53,29 @@ $env:ANTHROPIC_API_KEY = "sk-ant-..."      # PowerShell, kun denne session
 
 ## Automatik
 
-| Workflow | Kadence | Hvad |
+Arbejdet er delt i to, så ingen af delene kan vælte den anden:
+
+| Hvor | Kadence | Hvad |
 |---|---|---|
 | `.github/workflows/harvest.yml` | dagligt 05:17 UTC | høster feeds, committer `data/raw` |
-| `.github/workflows/verdict.yml` | den 1. kl. 06:00 UTC | vurderer forrige måned, committer, udgiver |
-| `.github/workflows/deploy.yml` | ved push til `main` | bygger og udgiver sitet igen |
+| `.github/workflows/verdict.yml` | den 1. kl. 06:00 UTC | vurderer forrige måned, committer `data/verdicts` |
+| **Netlify** (`netlify.toml`) | ved hvert push til `main` | bygger `site/` og udgiver eraifarligt.dk |
+
+GitHub Actions udgiver ikke noget. Den committer data, og Netlify reagerer på
+committet. Netlify kalder til gengæld aldrig Anthropic — byggetrinnet læser kun
+`data/verdicts/`, så API-nøglen skal ikke ligge hos Netlify.
 
 `verdict.yml` kan også startes manuelt med en valgfri måned og `overskriv`.
 
-### Opsætning i GitHub
+### Opsætning
 
-1. Læg repoet på GitHub og slå **Pages** til med kilden **GitHub Actions**.
-2. Tilføj hemmeligheden `ANTHROPIC_API_KEY` under
-   *Settings → Secrets and variables → Actions*.
-3. Peg `eraifarligt.dk` på GitHub Pages. `CNAME` skrives automatisk ved build.
+1. **GitHub:** tilføj hemmeligheden `ANTHROPIC_API_KEY` under
+   *Settings → Secrets and variables → Actions*. Det er den eneste hemmelighed
+   projektet har.
+2. **Netlify:** peg det eksisterende site på dette repo. Byggekommando og
+   udgivelsesmappe kommer fra `netlify.toml` og skal ikke sættes i brugerfladen.
+3. **Domænet rører vi ikke.** eraifarligt.dk peger allerede på Netlify, og
+   certifikatet bliver hvor det er.
 
 ## Konfiguration
 

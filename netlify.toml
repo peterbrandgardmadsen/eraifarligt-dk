@@ -1,0 +1,28 @@
+# eraifarligt.dk bygges af Netlify ved hvert push til main.
+#
+# Arbejdsdelingen:
+#   GitHub Actions  høster feeds dagligt og vurderer måneden den 1.,
+#                   og committer resultatet som JSON.
+#   Netlify         bygger og udgiver sitet ud fra de committede data.
+#
+# Netlify kalder aldrig Anthropic. Byggetrinnet læser kun data/verdicts/,
+# så der skal ingen API-nøgle ligge her.
+
+[build]
+  command = "pip install -r requirements.txt && PYTHONPATH=src python -m eraifarligt build"
+  publish = "site"
+
+[build.environment]
+  PYTHON_VERSION = "3.12"
+  PIP_DISABLE_PIP_VERSION_CHECK = "1"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+[[headers]]
+  for = "/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"

@@ -2,6 +2,9 @@ name: Månedens vurdering
 
 # Kører den 1. i hver måned og vurderer måneden der lige er afsluttet.
 # Fejler den, står kørslen rød her i stedet for at efterlade en forældet side.
+#
+# Selve udgivelsen sker ikke her. Netlify bygger sitet ud fra det commit denne
+# kørsel laver — se netlify.toml.
 
 on:
   schedule:
@@ -20,8 +23,6 @@ on:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
 concurrency:
   group: data-skrivning
@@ -49,7 +50,7 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
-          PYTHONPATH=src python -m eraifarligt run \
+          PYTHONPATH=src python -m eraifarligt run --spring-build-over \
             ${{ inputs.maaned && format('--maaned {0}', inputs.maaned) || '' }} \
             ${{ inputs.overskriv && '--overskriv' || '' }}
 
@@ -59,24 +60,9 @@ jobs:
           git config user.email "actions@github.com"
           git add data
           if git diff --cached --quiet; then
-            echo "Intet at gemme."
+            echo "Intet at gemme - Netlify udgiver ikke noget nyt."
           else
             git commit -m "Vurdering $(date -u +%Y-%m)"
             git pull --rebase --autostash
             git push
           fi
-
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: site
-
-  udgiv:
-    needs: vurder
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.udrulning.outputs.page_url }}
-    steps:
-      - id: udrulning
-        uses: actions/deploy-pages@v4
