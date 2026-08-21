@@ -307,8 +307,22 @@ Peter spotted it: the page asked "Er AI farligt i juli 2026?" while being read i
 August. Worth writing down properly, because it is a design flaw and not a typo.
 
 **The mismatch.** The domain asks a present-tense question. The page answered a
-past-tense one. Calendar-month batching means the answer on screen is between
-one and eight weeks behind the question a visitor is asking.
+past-tense one.
+
+The first version of this note said the answer could be "up to eight weeks old",
+which conflated two different ages and was wrong. Corrected, for July's verdict
+read on 31 August — the worst case before September's run:
+
+| What | Age |
+|---|---|
+| The verdict itself (published 1 Aug) | ~30 days |
+| End of the period it describes (31 Jul) | ~31 days |
+| Oldest article it cites (28 Jun, incl. `naade_dage: 3`) | ~62 days |
+
+So the *verdict* is at most about a month stale; only the *oldest evidence* in it
+reaches two months. Both facts belong on the page, stated separately — saying
+"the answer is eight weeks old" overstates the staleness of the answer while
+understating the age of the evidence.
 
 **2025 had the identical lag but concealed it.** The old page printed only
 "Senest opdateret: 3. august" and never named the period it covered, so it read
@@ -329,9 +343,9 @@ rather than forgotten.
   "Næste vurdering: 1. september 2026" in the footer of the verdict card.
 - **Archive pages** keep "Er AI farligt i juli 2026?" — retrospective framing is
   correct there, since those pages *are* historical.
-- **`om.html`** states the lag outright in the caveats list: read the site on the
-  28th and the answer may be eight weeks old, and that this is the price of using
-  completed months as the unit.
+- **`om.html`** states the lag outright in the caveats list, and distinguishes
+  the two ages: the verdict is about a month old at worst, while the oldest
+  events behind it may be two months old.
 - New `naeste_vurdering()` helper in `render.py`: a month's verdict publishes on
   the 1st of the following month, so the *next* verdict falls two months after
   the month displayed.
