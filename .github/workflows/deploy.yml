@@ -1,0 +1,56 @@
+name: Byg og udgiv sitet
+
+# Bygger sitet forfra ved ændringer i skabeloner, stilark, kode eller data.
+# Bruger ingen API-nøgle - alt indhold kommer fra data/verdicts.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "templates/**"
+      - "static/**"
+      - "src/**"
+      - "config/**"
+      - "data/verdicts/**"
+      - ".github/workflows/deploy.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages-udgivelse
+  cancel-in-progress: true
+
+jobs:
+  byg:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Byg sitet
+        run: PYTHONPATH=src python -m eraifarligt build
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  udgiv:
+    needs: byg
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.udrulning.outputs.page_url }}
+    steps:
+      - id: udrulning
+        uses: actions/deploy-pages@v4

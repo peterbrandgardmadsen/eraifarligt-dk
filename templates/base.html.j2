@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block titel %}Er AI farligt?{% endblock %}</title>
+<meta name="description" content="{% block beskrivelse %}En automatisk, månedlig vurdering af om kunstig intelligens er farlig — bygget på et vægtet faresindeks over offentlige nyhedskilder.{% endblock %}">
+<link rel="stylesheet" href="{{ rod|default('') }}static/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22><text y=%2213%22 font-size=%2214%22>🤖</text></svg>">
+</head>
+<body>
+<a class="spring" href="#indhold">Spring til indhold</a>
+
+<header class="topbjaelke">
+  <a class="maerke" href="{{ rod|default('') }}index.html">Er&nbsp;AI&nbsp;farligt<span>?</span></a>
+  <nav>
+    <a href="{{ rod|default('') }}index.html">Denne måned</a>
+    <a href="{{ rod|default('') }}arkiv.html">Arkiv</a>
+    <a href="{{ rod|default('') }}om.html">Om</a>
+  </nav>
+</header>
+
+<main id="indhold">
+{% block indhold %}{% endblock %}
+</main>
+
+<footer class="bund">
+  <p>
+    Siden opdateres automatisk den 1. i hver måned. Vurderingen er skrevet af en
+    sprogmodel ud fra offentlige nyhedskilder og er <strong>ikke</strong> en
+    ekspertudtalelse. Læs <a href="{{ rod|default('') }}om.html">metoden</a> før du
+    citerer den.
+  </p>
+  <p class="smaa">Bygget {{ bygget }} · <a href="{{ rod|default('') }}om.html#data">rådata</a></p>
+</footer>
+</body>
+</html>

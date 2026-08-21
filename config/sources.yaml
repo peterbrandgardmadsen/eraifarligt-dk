@@ -1,0 +1,155 @@
+# Kilder til månedens vurdering.
+# tier styrer troværdighedsvægt i prompten og hvor mange artikler hver kilde
+# maksimalt må bidrage med, så én stor arkivfeed ikke drukner resten.
+#
+# Alle feeds er verificeret live 2026-08-21. Feeds der fejler under et kørsel
+# er IKKE fatale - de logges i månedens JSON og vises som kildestatus på sitet.
+
+indstillinger:
+  # Maks artikler i alt der sendes til modellen.
+  maks_artikler_i_alt: 140
+  # Hvor mange dage tilbage der medregnes ud over selve måneden
+  # (fanger artikler med skæv eller manglende dato).
+  naade_dage: 3
+  # Timeout pr. feed i sekunder.
+  timeout: 20
+  user_agent: "eraifarligt.dk-bot/2.0 (+https://eraifarligt.dk)"
+
+kilder:
+  # --- Hændelser og tilsyn: højeste troværdighed ---
+  - navn: "AI Incident Database"
+    url: "https://incidentdatabase.ai/rss.xml"
+    tier: haendelser
+    maks: 25
+
+  - navn: "EU AI Act Newsletter"
+    url: "https://artificialintelligenceact.eu/feed/"
+    tier: regulering
+    maks: 12
+
+  - navn: "Lawfare"
+    url: "https://www.lawfaremedia.org/feeds/articles"
+    tier: analyse
+    maks: 8
+
+  # arXiv cs.AI blev fravalgt: feedet udgiver ca. 220 preprints i døgnet, hvilket
+  # både er 38 % af hele puljens diskforbrug og mest måler publikationstempo,
+  # ikke fare. Kapabilitetssporet dækkes af IEEE Spectrum, Transformer og Import AI.
+
+  # --- Journalistik ---
+  - navn: "TechCrunch AI"
+    url: "https://techcrunch.com/category/artificial-intelligence/feed/"
+    tier: presse
+    maks: 12
+
+  - navn: "MIT Technology Review AI"
+    url: "https://www.technologyreview.com/topic/artificial-intelligence/feed"
+    tier: presse
+    maks: 10
+
+  - navn: "Ars Technica AI"
+    url: "https://arstechnica.com/ai/feed/"
+    tier: presse
+    maks: 10
+
+  - navn: "The Verge AI"
+    url: "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml"
+    tier: presse
+    maks: 10
+
+  - navn: "WIRED AI"
+    url: "https://www.wired.com/feed/tag/ai/latest/rss"
+    tier: presse
+    maks: 8
+
+  - navn: "IEEE Spectrum AI"
+    url: "https://spectrum.ieee.org/feeds/topic/artificial-intelligence.rss"
+    tier: presse
+    maks: 8
+
+  - navn: "BBC Technology"
+    url: "https://feeds.bbci.co.uk/news/technology/rss.xml"
+    tier: presse
+    maks: 8
+
+  - navn: "ZDNet AI"
+    url: "https://www.zdnet.com/topic/artificial-intelligence/rss.xml"
+    tier: presse
+    maks: 6
+
+  - navn: "VentureBeat AI"
+    url: "https://venturebeat.com/category/ai/feed/"
+    tier: presse
+    maks: 6
+
+  # --- Danske kilder ---
+  - navn: "DR Viden"
+    url: "https://www.dr.dk/nyheder/service/feeds/viden"
+    tier: dansk
+    maks: 8
+
+  - navn: "Version2"
+    url: "https://www.version2.dk/rss"
+    tier: dansk
+    maks: 10
+
+  - navn: "Ingeniøren"
+    url: "https://ing.dk/rss"
+    tier: dansk
+    maks: 8
+
+  # --- Leverandører: relevante, men markedsføring ---
+  - navn: "OpenAI News"
+    url: "https://openai.com/news/rss.xml"
+    tier: leverandoer
+    maks: 6
+
+  - navn: "Google DeepMind Blog"
+    url: "https://deepmind.google/blog/rss.xml"
+    tier: leverandoer
+    maks: 6
+
+  # --- Kommentar og analyse ---
+  - navn: "Import AI"
+    url: "https://importai.substack.com/feed"
+    tier: kommentar
+    maks: 5
+
+  - navn: "Transformer"
+    url: "https://www.transformernews.ai/feed"
+    tier: kommentar
+    maks: 5
+
+  - navn: "Simon Willison"
+    url: "https://simonwillison.net/atom/everything/"
+    tier: kommentar
+    maks: 5
+
+  - navn: "Gary Marcus"
+    url: "https://garymarcus.substack.com/feed"
+    tier: kommentar
+    maks: 4
+
+  # --- Community: lav troværdighed, medtaget som stemningsmåler ---
+  - navn: "Reddit r/artificial"
+    url: "https://www.reddit.com/r/artificial/.rss"
+    tier: community
+    maks: 8
+
+  - navn: "Hacker News"
+    url: "https://news.ycombinator.com/rss"
+    tier: community
+    maks: 8
+
+# Beskrivelse af hvert tier, sendes ordret til modellen så den ved
+# hvor meget vægt den skal lægge på en given kilde.
+tier_beskrivelser:
+  haendelser: "Kurateret database over dokumenterede AI-skader. Høj troværdighed. Vægt tungt."
+  regulering: "Officiel og juridisk opfølgning på AI-lovgivning. Høj troværdighed."
+  analyse: "Juridisk og sikkerhedspolitisk faganalyse. Høj troværdighed."
+  forskning: "Preprints. Ikke peer reviewed. Signal om kapabilitet, ikke om skade."
+  presse: "Etableret teknologijournalistik. Middel til høj troværdighed."
+  dansk: "Dansk teknologi- og videnskabsjournalistik. Middel til høj troværdighed."
+  leverandoer: "Udgivet af AI-virksomheder selv. Behandl som markedsføring, ikke som bevis."
+  kommentar: "Navngivne kommentatorer med kendte holdninger. Meninger, ikke kendsgerninger."
+  community: "Ufiltrerede forumopslag. Lav troværdighed. Brug kun som stemningsindikator."

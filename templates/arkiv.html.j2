@@ -1,0 +1,42 @@
+{% extends "base.html.j2" %}
+
+{% block titel %}Arkiv — Er AI farligt?{% endblock %}
+{% block beskrivelse %}Alle månedlige vurderinger og faresindeks fra eraifarligt.dk.{% endblock %}
+
+{% block indhold %}
+<section class="afsnit">
+  <h1>Arkiv</h1>
+  <p class="hjaelp">
+    Hver måned står som den blev afgjort. Ingen vurdering bliver rettet med
+    tilbagevirkende kraft — også når den viser sig at have været forkert.
+  </p>
+  {% if alle_maaneder|length > 1 %}
+  {{ trend_svg|safe }}
+  {% endif %}
+</section>
+
+<section class="afsnit">
+  <table class="arkivtabel">
+    <thead>
+      <tr><th>Måned</th><th>Svar</th><th>Indeks</th><th>Ændring</th><th>Grundlag</th></tr>
+    </thead>
+    <tbody>
+      {% for m in alle_maaneder|reverse %}
+      <tr>
+        <td><a href="{{ rod }}maaned/{{ m.maaned }}.html">{{ m.maaned|dansk_maaned }}</a></td>
+        <td><span class="mærkat tone-{{ m.tone }}">{{ m.bedoemmelse }}</span></td>
+        <td class="tal">{{ m.indeks }}</td>
+        <td class="tal">
+          {% if m.aendring is not none %}
+            <span class="delta {% if m.aendring > 0 %}op{% elif m.aendring < 0 %}ned{% else %}flad{% endif %}">
+              {% if m.aendring > 0 %}▲ {{ m.aendring }}{% elif m.aendring < 0 %}▼ {{ m.aendring|abs }}{% else %}0{% endif %}
+            </span>
+          {% else %}—{% endif %}
+        </td>
+        <td class="smaa">{{ m.grundlag.antal_artikler }} artikler / {{ m.grundlag.antal_kilder }} kilder</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

@@ -1,0 +1,134 @@
+{% extends "base.html.j2" %}
+
+{% block titel %}Er AI farligt? {{ m.bedoemmelse }} — {{ m.maaned|dansk_maaned }}{% endblock %}
+{% block beskrivelse %}Vurdering for {{ m.maaned|dansk_maaned }}: {{ m.bedoemmelse }}, faresindeks {{ m.indeks }} af 100, baseret på {{ m.grundlag.antal_artikler }} artikler fra {{ m.grundlag.antal_kilder }} kilder.{% endblock %}
+
+{% block indhold %}
+{% if not er_forside %}
+<p class="tilbage"><a href="{{ rod }}index.html">← Tilbage til denne måneds vurdering</a></p>
+{% endif %}
+
+<section class="dom tone-{{ m.tone }}">
+  <p class="dom-sporgsmaal">Er AI farligt i {{ m.maaned|dansk_maaned }}?</p>
+  <p class="dom-svar">{{ m.bedoemmelse }}</p>
+  <p class="dom-indeks">
+    Faresindeks <strong>{{ m.indeks }}</strong> af 100
+    {% if m.aendring is not none %}
+      <span class="delta {% if m.aendring > 0 %}op{% elif m.aendring < 0 %}ned{% else %}flad{% endif %}">
+        {% if m.aendring > 0 %}▲ {{ m.aendring }}{% elif m.aendring < 0 %}▼ {{ m.aendring|abs }}{% else %}uændret{% endif %}
+        siden sidste måned
+      </span>
+    {% else %}
+      <span class="delta flad">første måling</span>
+    {% endif %}
+  </p>
+  <p class="dom-grundlag">
+    {{ m.grundlag.antal_artikler }} artikler · {{ m.grundlag.antal_kilder }} kilder ·
+    opgjort {{ m.genereret|dansk_dato }}
+  </p>
+</section>
+
+<section class="afsnit">
+  <h2>Sådan ser måneden ud</h2>
+  <p class="broedtekst">{{ m.sammenfatning }}</p>
+  <p class="modvaegt"><span>Modvægt</span> {{ m.modvaegt }}</p>
+</section>
+
+{% if m.vigtigste_haendelser %}
+<section class="afsnit">
+  <h2>Det der rykkede tallet</h2>
+  <ul class="haendelser">
+    {% for h in m.vigtigste_haendelser %}
+    <li>
+      <h3>{% if h.link %}<a href="{{ h.link }}" rel="noopener">{{ h.overskrift }}</a>{% else %}{{ h.overskrift }}{% endif %}</h3>
+      <p>{{ h.betydning }}</p>
+      <p class="kildenavn">{{ h.kilde }}</p>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+<section class="afsnit">
+  <h2>Regnskabet bag tallet</h2>
+  <p class="hjaelp">
+    Hver dimension scores 0–100, hvor højere betyder mere farligt. Faresindekset er
+    det vægtede gennemsnit — det er tallet ovenfor, og du kan regne efter.
+  </p>
+  <div class="dimensioner">
+    {% for d in m.dimensioner %}
+    <article class="dimension">
+      <header>
+        <h3>{{ d.label }}</h3>
+        <p class="tal"><strong>{{ d.score }}</strong><span>vægt {{ d.vaegt }}</span></p>
+      </header>
+      <div class="bjaelke tone-{{ d.tone }}" role="img" aria-label="Score {{ d.score }} af 100">
+        <span style="width: {{ d.score }}%"></span>
+      </div>
+      <p>{{ d.begrundelse }}</p>
+      {% if d.ubegrundet %}
+      <p class="advarsel">Uden gyldige kildehenvisninger — behandl denne score med mistro.</p>
+      {% else %}
+      <ul class="kildeliste">
+        {% for k in d.kilder %}
+        <li><a href="{{ k.link }}" rel="noopener">{{ k.titel }}</a> <span>{{ k.kilde }}</span></li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+{% if alle_maaneder|length > 1 %}
+<section class="afsnit">
+  <h2>Udvikling</h2>
+  {{ trend_svg|safe }}
+  <p class="forklaring">
+    {% for b in baand %}<span class="prik tone-{{ b.tone }}"></span>{{ b.label }} fra {{ b.min }}{% if not loop.last %} · {% endif %}{% endfor %}
+  </p>
+</section>
+{% endif %}
+
+<section class="afsnit kildestatus">
+  <h2>Kildestatus</h2>
+  <p class="hjaelp">
+    Hvilke feeds der svarede da vurderingen blev lavet. En kilde der fejler bliver
+    stående her, så udeladelser er synlige i stedet for tavse.
+  </p>
+  <table>
+    <thead><tr><th>Kilde</th><th>Status</th><th>Brugt</th></tr></thead>
+    <tbody>
+      {% for s in m.kildestatus %}
+      <tr class="{{ 'ok' if s.ok else 'fejl' }}">
+        <td>{{ s.navn }}</td>
+        <td>{{ 'OK' if s.ok else s.fejl }}</td>
+        <td>{{ s.antal_i_perioden if s.ok else '—' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% if m.koersel.advarsler %}
+  <div class="advarsler">
+    <h3>Advarsler fra kørslen</h3>
+    <ul>{% for a in m.koersel.advarsler %}<li>{{ a }}</li>{% endfor %}</ul>
+  </div>
+  {% endif %}
+  <p class="smaa">
+    Model {{ m.koersel.model }} · prompt-hash {{ m.koersel.prompt_hash }} ·
+    {{ m.koersel.input_tokens }} ind / {{ m.koersel.output_tokens }} ud ·
+    <a href="{{ rod }}om.html#data">rådata</a>
+  </p>
+</section>
+
+<nav class="maanednav">
+  {% set idx = alle_maaneder.index(m) %}
+  {% if idx > 0 %}
+  <a href="{{ rod }}maaned/{{ alle_maaneder[idx - 1].maaned }}.html">← {{ alle_maaneder[idx - 1].maaned|dansk_maaned }}</a>
+  {% endif %}
+  <a class="midt" href="{{ rod }}arkiv.html">Alle måneder</a>
+  {% if idx < alle_maaneder|length - 1 %}
+  <a href="{{ rod }}maaned/{{ alle_maaneder[idx + 1].maaned }}.html">{{ alle_maaneder[idx + 1].maaned|dansk_maaned }} →</a>
+  {% endif %}
+</nav>
+{% endblock %}

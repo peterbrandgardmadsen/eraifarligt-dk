@@ -1,0 +1,155 @@
+{
+  "name": "AI Danger Verdict Weekly",
+  "nodes": [
+    {
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {
+              "mode": "everyWeek",
+              "weekday": "1",
+              "hour": 9,
+              "minute": 0
+            }
+          ]
+        }
+      },
+      "id": "5a415059-badb-449e-8c31-3c46b6070fae",
+      "name": "Weekly Trigger",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [
+        100,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "urls": [
+          "https://www.reddit.com/r/artificial/.rss",
+          "https://openai.com/blog/rss.xml",
+          "https://techcrunch.com/tag/ai/feed/",
+          "https://www.technologyreview.com/feed/",
+          "https://futureoflife.org/feed/"
+        ]
+      },
+      "id": "7a353d71-503c-4a34-a15d-854e4c34a9b6",
+      "name": "Fetch AI News",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        300,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "sheetId": "1xGGYVTG-HixFfmBNyjqzD-5Wbx98jGz1cmkAr6GSWTo",
+        "options": {
+          "range": "A2:C2"
+        }
+      },
+      "id": "03e48e89-982a-4530-9742-5e6097d754b2",
+      "name": "Get Last Verdict",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 3,
+      "position": [
+        500,
+        300
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "",
+          "name": "Google Sheets isAIdangerous"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "const headlines = $items(\"Fetch AI News\").map(item => `- ${item.json.title}`).join('\\n');\nconst lastVerdict = $items(\"Get Last Verdict\")[0].json.Verdict;\n\nconst prompt = `Last week's verdict: \"${lastVerdict}\".\n\nThis week's headlines:\n${headlines}\n\nBased on the above, is AI dangerous this week? Respond with a one-word verdict (Yes, No, Maybe) and a one-sentence reason.`;\n\nreturn [{ json: { prompt: prompt } }];"
+      },
+      "id": "b6f04746-d441-4796-9d33-1490212b779a",
+      "name": "Build Prompt for GPT",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        700,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "model": "gpt-3.5-turbo",
+        "messages": {
+          "item": [
+            {
+              "role": "user",
+              "content": "={{ $json[\"prompt\"] }}"
+            }
+          ]
+        }
+      },
+      "id": "2b22b64b-a94f-4096-8094-a1286c4f828a",
+      "name": "Get Verdict from GPT",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 3,
+      "position": [
+        900,
+        300
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "",
+          "name": "OpenAI isAIdangerous"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Weekly Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch AI News",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch AI News": {
+      "main": [
+        [
+          {
+            "node": "Get Last Verdict",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Last Verdict": {
+      "main": [
+        [
+          {
+            "node": "Build Prompt for GPT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Prompt for GPT": {
+      "main": [
+        [
+          {
+            "node": "Get Verdict from GPT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

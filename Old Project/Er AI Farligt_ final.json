@@ -1,0 +1,545 @@
+{
+  "name": "Er AI Farligt?",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "months",
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "id": "359e505a-df16-452b-adeb-edd9c0cf930b",
+      "name": "Monthly Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -304,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://techcrunch.com/tag/ai/feed/",
+        "options": {}
+      },
+      "id": "f44d7608-1663-4092-aca5-f0d52011e580",
+      "name": "TechCrunch RSS",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        -64,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://openai.com/blog/rss.xml",
+        "options": {}
+      },
+      "id": "5b04fafa-5e7c-4731-8e1b-bbcb1a9caa32",
+      "name": "OpenAI Blog RSS",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        -64,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://www.reddit.com/r/artificial/.rss",
+        "options": {}
+      },
+      "id": "ccd1d647-a687-4d94-bf64-66c1e3a89e2a",
+      "name": "Reddit Artificial RSS",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        -64,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "",
+        "options": {}
+      },
+      "id": "d4ba5b24-adbf-46bc-85a3-947daf1a5a10",
+      "name": "Aggregate RSS Items",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        368,
+        208
+      ],
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1xGGYVTG-HixFfmBNyjqzD-5Wbx98jGz1cmkAr6GSWTo",
+          "mode": "list",
+          "cachedResultName": "AI_danger_verdicts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1xGGYVTG-HixFfmBNyjqzD-5Wbx98jGz1cmkAr6GSWTo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1xGGYVTG-HixFfmBNyjqzD-5Wbx98jGz1cmkAr6GSWTo/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "dato": "={{ $json.dato }}",
+            "bedømmelse": "={{ $json[\"bedømmelse\"] }}",
+            "ræsonnement": "={{ $json[\"ræsonnement\"] }}",
+            "kilder": "={{ $json.kilder }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "dato",
+              "displayName": "dato",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "bedømmelse",
+              "displayName": "bedømmelse",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ræsonnement",
+              "displayName": "ræsonnement",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "kilder",
+              "displayName": "kilder",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        1344,
+        208
+      ],
+      "id": "b9a64ebb-6a74-4515-a292-d12a6fc42622",
+      "name": "Log to Sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GEZ6yr9S87sUua4q",
+          "name": "Google Sheets isAIdangerous"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const formattedDate = new Date($json.dato).toLocaleDateString('da-DK', {\n  year: 'numeric',\n  month: 'long',\n  day: 'numeric'\n});\n\n\nconst html = `<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <title>AI Verdict – ${formattedDate}</title>\n</head>\n<body style=\"font-family: Arial, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; line-height: 1.6; background-color: #f9f9f9; color: #333;\">\n  <article>\n    <header>\n      <h1 style=\"text-align: center;\">Er AI farligt?</h1>\n      <p style=\"text-align: center;\"><em>Senest opdateret: ${formattedDate}</em></p>\n    </header>\n    <section style=\"margin-top: 30px;\">\n      <p><strong>Bedømmelse:</strong> ${$json.bedømmelse}</p>\n      <p><strong>Forklaring:</strong><br>${$json.ræsonnement}</p>\n      <p><em>Kilder analyseret: ${$json.kilder}</em></p>\n    </section>\n    <footer style=\"margin-top: 40px; text-align: center;\">\n      <p style=\"font-size: 0.9em; color: #777;\">Denne side er genereret automatisk af en n8n workflow, og bør ikke betragtes som pålidelig information.</p>\n    </footer>\n  </article>\n</body>\n</html>`;\n\nreturn {\n  json: {\n    html\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1536,
+        208
+      ],
+      "id": "6e8e2865-c88f-4dd3-8d4d-cb75ef6faeb5",
+      "name": "Create HTML"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "file",
+        "operation": "edit",
+        "owner": {
+          "__rl": true,
+          "value": "peterbrandgardmadsen",
+          "mode": "list",
+          "cachedResultName": "peterbrandgardmadsen",
+          "cachedResultUrl": "https://github.com/peterbrandgardmadsen"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "ai-verdict-site",
+          "mode": "list",
+          "cachedResultName": "ai-verdict-site",
+          "cachedResultUrl": "https://github.com/peterbrandgardmadsen/ai-verdict-site"
+        },
+        "filePath": "=index.html",
+        "fileContent": "={{ $json[\"html\"] }}",
+        "commitMessage": "Update AI verdict",
+        "additionalParameters": {
+          "branch": {
+            "branch": "main"
+          }
+        }
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        1744,
+        208
+      ],
+      "id": "2efa7ce0-f7d1-4d84-828d-2557ec578c66",
+      "name": "Push HTML to GitHub",
+      "webhookId": "1e31ef02-94d4-40fc-8ab1-312e27a4605e",
+      "executeOnce": false,
+      "credentials": {
+        "githubOAuth2Api": {
+          "id": "pbY1GwnDTVcIk0ib",
+          "name": "GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "Du er en analytiker med speciale i teknologi, etik og samfundssikkerhed.\n\nDin opgave er at analysere nedenstående artikler (aggregeret fra nyhedskilder) og vurdere:\nEr kunstig intelligens (AI) farlig i denne måned?\n\nBrug kun informationerne i teksten. Du skal:\n1. Foretage en samlet vurdering baseret på artiklernes indhold\n2. Skrive på korrekt og læsevenligt dansk\n3. Returnere **et JSON-objekt** med følgende struktur:\n\n{\n  \"bedømmelse\": \"Ja\" | \"Nej\" | \"Måske\",\n  \"ræsonnement\": \"[kort forklaring på vurderingen, skal fylde 400-700 tegn]\",\n  \"kilder\": [antal kilder analyseret (anvend 10-20 forskellige kilder)]\n}\n\n**Artikler:**\n{{$json.rssText}}\n",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.1,
+      "position": [
+        784,
+        208
+      ],
+      "id": "4fcb7c1a-4329-4fbf-af7d-25e0e2a3f911",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "jsCode": "return {\n  json: {\n    rssText: $items().map(item => {\n      const title = item.json.title?.trim() || 'Uden titel';\n      const content = item.json.content?.trim()\n        || item.json.contentSnippet?.trim()\n        || item.json.description?.trim()\n        || 'Ingen indhold';\n      const source = item.json.link || 'Ukendt kilde';\n\n      return `• ${title}\\n${content}\\n(Kilde: ${source})`;\n    }).join('\\n\\n'),\n    sources: $items().length\n  }\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        560,
+        208
+      ],
+      "id": "57062a33-75b9-4a7c-94e2-5422ab00f6ca",
+      "name": "Combine RSS feeds to single text block"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        720,
+        432
+      ],
+      "id": "513fc619-b7d1-404b-b028-966f66191781",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "iW8euOig3WbXwPfJ",
+          "name": "OpenAi isAIdangerous"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "monthly-risk-report"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        848,
+        384
+      ],
+      "id": "8a8ede7c-7dc1-4da4-8230-2551cac67637",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"bedømmelse\": \"Måske\",\n  \"ræsonnement\": \"AI forårsager stadig bekymring om misinformation og arbejdsmarkedet.\",\n  \"kilder\": 5\n}\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        992,
+        416
+      ],
+      "id": "ca3d9270-9e12-4af0-8067-ba0e8bde0930",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "58602236-2755-4956-8495-88ce42d772f5",
+              "name": "dato",
+              "value": "={{ new Date().toISOString().split('T')[0] }}\n",
+              "type": "string"
+            },
+            {
+              "id": "25daa2d2-337a-44ed-ab61-007824f650bc",
+              "name": "bedømmelse",
+              "value": "={{ $json.output[\"bedømmelse\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "1c2fbc40-3c53-4356-a388-4df196700db1",
+              "name": "ræsonnement",
+              "value": "=  {{ $json.output[\"ræsonnement\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "ab72083d-b935-4927-a739-086c9ce08400",
+              "name": "kilder",
+              "value": "={{ $json.output.kilder }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1168,
+        208
+      ],
+      "id": "125f2d97-25f6-4fb7-a550-ac50ac822979",
+      "name": "Tilføj dato"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "numberInputs": 3,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        176,
+        192
+      ],
+      "id": "88cc8f78-5b8c-4780-b892-2d12c6ad9485",
+      "name": "Merge"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Monthly Trigger": {
+      "main": [
+        [
+          {
+            "node": "TechCrunch RSS",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "OpenAI Blog RSS",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Reddit Artificial RSS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TechCrunch RSS": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Blog RSS": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Reddit Artificial RSS": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Aggregate RSS Items": {
+      "main": [
+        [
+          {
+            "node": "Combine RSS feeds to single text block",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log to Sheet": {
+      "main": [
+        [
+          {
+            "node": "Create HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create HTML": {
+      "main": [
+        [
+          {
+            "node": "Push HTML to GitHub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine RSS feeds to single text block": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Tilføj dato",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tilføj dato": {
+      "main": [
+        [
+          {
+            "node": "Log to Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Aggregate RSS Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "bea6de79-a32e-4337-b9f8-7cf5f27d7bdc",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b60cebb668dfc33cc3bcb30a207cd28da255db04ddf3c9204bc9c1fc28855659"
+  },
+  "id": "eHpsqUbCMevrj5FZ",
+  "tags": []
+}

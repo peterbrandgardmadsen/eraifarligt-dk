@@ -1,0 +1,82 @@
+name: Månedens vurdering
+
+# Kører den 1. i hver måned og vurderer måneden der lige er afsluttet.
+# Fejler den, står kørslen rød her i stedet for at efterlade en forældet side.
+
+on:
+  schedule:
+    - cron: "0 6 1 * *"   # 06:00 UTC den 1.
+  workflow_dispatch:
+    inputs:
+      maaned:
+        description: "Måned der skal vurderes (YYYY-MM). Tom = forrige måned."
+        required: false
+        type: string
+      overskriv:
+        description: "Kør måneden om selv om den allerede findes"
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: data-skrivning
+  cancel-in-progress: false
+
+jobs:
+  vurder:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      # Sidste høst inden vurderingen, så månedens allersidste dage kommer med.
+      - name: Afsluttende høst
+        run: PYTHONPATH=src python -m eraifarligt harvest
+        continue-on-error: true
+
+      - name: Vurdér måneden
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          PYTHONPATH=src python -m eraifarligt run \
+            ${{ inputs.maaned && format('--maaned {0}', inputs.maaned) || '' }} \
+            ${{ inputs.overskriv && '--overskriv' || '' }}
+
+      - name: Gem resultatet
+        run: |
+          git config user.name  "eraifarligt-bot"
+          git config user.email "actions@github.com"
+          git add data
+          if git diff --cached --quiet; then
+            echo "Intet at gemme."
+          else
+            git commit -m "Vurdering $(date -u +%Y-%m)"
+            git pull --rebase --autostash
+            git push
+          fi
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  udgiv:
+    needs: vurder
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.udrulning.outputs.page_url }}
+    steps:
+      - id: udrulning
+        uses: actions/deploy-pages@v4

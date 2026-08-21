@@ -1,0 +1,288 @@
+/* eraifarligt.dk — 2026 */
+
+:root {
+  --bg: #fbfaf8;
+  --bg-kort: #ffffff;
+  --tekst: #1c1b19;
+  --dæmpet: #6b6862;
+  --streg: #e2ded7;
+  --accent: #1c1b19;
+
+  --lav: #2f7d5c;
+  --lav-blød: #e6f2ec;
+  --mellem: #a86a1c;
+  --mellem-blød: #f8efdf;
+  --høj: #b3392c;
+  --høj-blød: #fae9e6;
+
+  --radius: 10px;
+  --skygge: 0 1px 2px rgba(28, 27, 25, .05), 0 6px 20px rgba(28, 27, 25, .04);
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #14130f;
+    --bg-kort: #1c1b17;
+    --tekst: #ece8e0;
+    --dæmpet: #9a958a;
+    --streg: #302e28;
+    --accent: #ece8e0;
+
+    --lav: #63c79b;
+    --lav-blød: #16281f;
+    --mellem: #d7a44f;
+    --mellem-blød: #2a2115;
+    --høj: #e97a6b;
+    --høj-blød: #2d1916;
+
+    --skygge: none;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--tekst);
+  font-family: var(--sans);
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration-color: var(--streg); text-underline-offset: 3px; }
+a:hover { text-decoration-color: currentColor; }
+
+.spring {
+  position: absolute; left: -9999px;
+  background: var(--bg-kort); padding: .6rem 1rem; border-radius: var(--radius);
+}
+.spring:focus { left: 1rem; top: 1rem; z-index: 10; }
+
+/* --- Ramme --- */
+
+.topbjaelke, main, .bund {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
+.topbjaelke {
+  display: flex; flex-wrap: wrap; gap: 1rem;
+  align-items: baseline; justify-content: space-between;
+  padding-top: 1.75rem; padding-bottom: 1.75rem;
+}
+.maerke {
+  font-family: var(--serif);
+  font-size: 1.15rem; font-weight: 600;
+  letter-spacing: -.01em; text-decoration: none;
+}
+.maerke span { color: var(--høj); }
+.topbjaelke nav { display: flex; gap: 1.25rem; font-size: .92rem; }
+.topbjaelke nav a { color: var(--dæmpet); text-decoration: none; }
+.topbjaelke nav a:hover { color: var(--tekst); }
+
+.bund {
+  margin-top: 4rem; padding-top: 2rem; padding-bottom: 3rem;
+  border-top: 1px solid var(--streg);
+  color: var(--dæmpet); font-size: .88rem;
+}
+.bund p { margin: .5rem 0; }
+
+/* --- Dommen --- */
+
+.dom {
+  border: 1px solid var(--streg);
+  border-radius: var(--radius);
+  background: var(--bg-kort);
+  box-shadow: var(--skygge);
+  padding: 2.5rem 2rem;
+  text-align: center;
+  margin-bottom: 3rem;
+}
+.dom-sporgsmaal {
+  margin: 0; color: var(--dæmpet);
+  font-size: .95rem; letter-spacing: .04em;
+}
+.dom-svar {
+  font-family: var(--serif);
+  font-size: clamp(3.5rem, 14vw, 5.5rem);
+  line-height: 1; margin: .5rem 0 1rem;
+  letter-spacing: -.03em;
+}
+.dom-indeks { margin: 0 0 .35rem; font-size: 1.05rem; }
+.dom-indeks strong { font-variant-numeric: tabular-nums; }
+.dom-grundlag { margin: 0; color: var(--dæmpet); font-size: .85rem; }
+
+.tone-lav .dom-svar { color: var(--lav); }
+.tone-mellem .dom-svar { color: var(--mellem); }
+.tone-hoej .dom-svar { color: var(--høj); }
+.dom.tone-lav { background: var(--lav-blød); }
+.dom.tone-mellem { background: var(--mellem-blød); }
+.dom.tone-hoej { background: var(--høj-blød); }
+
+.delta { font-size: .88rem; padding-left: .35rem; white-space: nowrap; }
+.delta.op { color: var(--høj); }
+.delta.ned { color: var(--lav); }
+.delta.flad { color: var(--dæmpet); }
+
+/* --- Afsnit --- */
+
+.afsnit { margin-bottom: 3.5rem; }
+
+h1 { font-family: var(--serif); font-size: 2rem; letter-spacing: -.02em; margin: 0 0 1rem; }
+h2 {
+  font-size: .85rem; font-weight: 600;
+  letter-spacing: .08em; text-transform: uppercase;
+  color: var(--dæmpet);
+  margin: 0 0 1rem; padding-bottom: .6rem;
+  border-bottom: 1px solid var(--streg);
+}
+h3 { font-size: 1.02rem; margin: 0 0 .35rem; }
+
+.broedtekst { font-size: 1.06rem; }
+.hjaelp, .smaa, .forklaring, .kildenavn { color: var(--dæmpet); font-size: .88rem; }
+.tilbage { font-size: .9rem; margin-bottom: 1.5rem; }
+
+.modvaegt {
+  border-left: 3px solid var(--streg);
+  padding: .1rem 0 .1rem 1rem;
+  color: var(--dæmpet);
+}
+.modvaegt span {
+  display: block; font-size: .78rem; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--tekst);
+}
+
+/* --- Hændelser --- */
+
+.haendelser { list-style: none; padding: 0; margin: 0; }
+.haendelser li { padding: 1rem 0; border-bottom: 1px solid var(--streg); }
+.haendelser li:last-child { border-bottom: none; }
+.haendelser p { margin: .25rem 0 0; }
+.kildenavn { margin-top: .35rem !important; }
+
+/* --- Dimensioner --- */
+
+.dimensioner { display: grid; gap: 1rem; }
+.dimension {
+  border: 1px solid var(--streg);
+  border-radius: var(--radius);
+  background: var(--bg-kort);
+  padding: 1.25rem;
+}
+.dimension header {
+  display: flex; gap: 1rem;
+  align-items: baseline; justify-content: space-between;
+}
+.dimension .tal { margin: 0; text-align: right; white-space: nowrap; }
+.dimension .tal strong { font-size: 1.5rem; font-variant-numeric: tabular-nums; }
+.dimension .tal span { display: block; font-size: .75rem; color: var(--dæmpet); }
+.dimension p { margin: .75rem 0 0; }
+
+.bjaelke {
+  height: 6px; margin-top: .75rem;
+  background: var(--streg); border-radius: 3px; overflow: hidden;
+}
+.bjaelke span { display: block; height: 100%; background: var(--dæmpet); }
+.bjaelke.tone-lav span { background: var(--lav); }
+.bjaelke.tone-mellem span { background: var(--mellem); }
+.bjaelke.tone-hoej span { background: var(--høj); }
+
+.kildeliste { list-style: none; padding: 0; margin: .85rem 0 0; font-size: .85rem; }
+.kildeliste li { padding: .25rem 0; border-top: 1px dotted var(--streg); }
+.kildeliste span { color: var(--dæmpet); }
+
+.advarsel {
+  color: var(--høj); font-size: .85rem;
+  background: var(--høj-blød); padding: .5rem .75rem; border-radius: 6px;
+}
+
+/* --- Graf --- */
+
+.trend { width: 100%; height: auto; display: block; margin: .5rem 0 1rem; }
+.trend .gitter { stroke: var(--streg); stroke-width: 1; }
+.trend .akse { fill: var(--dæmpet); font-size: 11px; font-family: var(--sans); }
+.trend .linje { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; }
+.trend .punkt { stroke: var(--bg); stroke-width: 2; }
+.trend .punkt.tone-lav { fill: var(--lav); }
+.trend .punkt.tone-mellem { fill: var(--mellem); }
+.trend .punkt.tone-hoej { fill: var(--høj); }
+.trend .zone-lav { fill: var(--lav-blød); }
+.trend .zone-mellem { fill: var(--mellem-blød); }
+.trend .zone-hoej { fill: var(--høj-blød); }
+
+.prik {
+  display: inline-block; width: .55rem; height: .55rem;
+  border-radius: 50%; margin: 0 .35rem 0 .75rem;
+}
+.prik.tone-lav { background: var(--lav); }
+.prik.tone-mellem { background: var(--mellem); }
+.prik.tone-hoej { background: var(--høj); }
+.forklaring span:first-child { margin-left: 0; }
+
+/* --- Tabeller --- */
+
+table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+th, td { text-align: left; padding: .6rem .5rem; border-bottom: 1px solid var(--streg); }
+th { color: var(--dæmpet); font-weight: 600; font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; }
+td.tal { font-variant-numeric: tabular-nums; }
+
+.kildestatus tr.fejl td { color: var(--høj); }
+.advarsler { margin-top: 1rem; font-size: .85rem; color: var(--høj); }
+.advarsler ul { margin: .35rem 0 0; padding-left: 1.1rem; }
+
+.mærkat {
+  display: inline-block; padding: .1rem .5rem;
+  border-radius: 999px; font-size: .82rem; font-weight: 600;
+}
+.mærkat.tone-lav { background: var(--lav-blød); color: var(--lav); }
+.mærkat.tone-mellem { background: var(--mellem-blød); color: var(--mellem); }
+.mærkat.tone-hoej { background: var(--høj-blød); color: var(--høj); }
+
+.sammenlign td { vertical-align: top; width: 50%; }
+.sammenlign td:first-child { color: var(--dæmpet); }
+
+/* --- Om-siden --- */
+
+.trin { list-style: none; counter-reset: t; padding: 0; margin: 0; }
+.trin li { counter-increment: t; padding-left: 2.75rem; position: relative; margin-bottom: 1.75rem; }
+.trin li::before {
+  content: counter(t);
+  position: absolute; left: 0; top: 0;
+  width: 1.9rem; height: 1.9rem;
+  display: grid; place-items: center;
+  border: 1px solid var(--streg); border-radius: 50%;
+  font-size: .85rem; color: var(--dæmpet);
+}
+.trin p { margin: .35rem 0 0; }
+
+.dimliste dt { font-weight: 600; margin-top: 1rem; }
+.dimliste dd { margin: .25rem 0 0; color: var(--dæmpet); }
+.vaegt { font-weight: 400; font-size: .8rem; color: var(--dæmpet); }
+
+.forbehold { padding-left: 1.1rem; }
+.forbehold li { margin-bottom: .5rem; }
+
+/* --- Navigation mellem måneder --- */
+
+.maanednav {
+  display: flex; flex-wrap: wrap; gap: 1rem;
+  justify-content: space-between; align-items: center;
+  padding-top: 1.5rem; border-top: 1px solid var(--streg);
+  font-size: .9rem;
+}
+.maanednav .midt { color: var(--dæmpet); }
+
+@media (max-width: 480px) {
+  body { font-size: 16px; }
+  .dom { padding: 2rem 1.25rem; }
+  .sammenlign td { display: block; width: 100%; border-bottom: none; }
+  .sammenlign tr { border-bottom: 1px solid var(--streg); display: block; padding: .5rem 0; }
+  .sammenlign thead { display: none; }
+  .sammenlign td:first-child::before { content: "2025 — "; font-weight: 600; }
+  .sammenlign td:last-child::before { content: "2026 — "; font-weight: 600; }
+}

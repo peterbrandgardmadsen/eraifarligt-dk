@@ -1,0 +1,71 @@
+# Dimensioner der indgår i faresindekset.
+# id: ASCII-nøgle brugt i JSON og kode. label: dansk overskrift på sitet.
+# weight: vægt i det vægtede gennemsnit.
+# retning: alle scorer er 0-100 hvor HØJERE = MERE farligt.
+
+dimensioner:
+  - id: skader
+    label: "Konkrete skader og hændelser"
+    weight: 1.5
+    beskrivelse: >-
+      Dokumenterede tilfælde hvor AI-systemer har forvoldt skade i denne måned:
+      ulykker, misbrug, svindel, deepfake-overgreb, cyberangreb udført med AI,
+      fejlslagne agent-systemer, sikkerhedsbrud. Høj score = mange og alvorlige
+      dokumenterede skader. Lav score = få eller bagatelagtige hændelser.
+
+  - id: misinformation
+    label: "Misinformation og manipulation"
+    weight: 1.0
+    beskrivelse: >-
+      Syntetisk medieindhold, valgpåvirkning, svindelnumre baseret på
+      stemme- og videokloning, forgiftning af det offentlige informationsrum.
+      Høj score = udbredt og virkningsfuld manipulation i denne måned.
+
+  - id: arbejdsmarked
+    label: "Arbejdsmarked og fortrængning"
+    weight: 1.0
+    beskrivelse: >-
+      Fyringer begrundet i AI, forsvundne jobkategorier, pres på løn og
+      vilkår, ændringer i efterspørgslen efter arbejdskraft. Høj score =
+      omfattende og hurtig fortrængning uden omstilling.
+
+  - id: kapabilitet
+    label: "Kapabilitetsspring og kontroltab"
+    weight: 1.25
+    beskrivelse: >-
+      Nye modeller eller systemer der kan markant mere end måneden før,
+      især inden for autonomi, cyber, biologi og selvforbedring. Tæller også
+      dokumenterede tilfælde af modeller der omgår kontrol eller instruktioner.
+      Høj score = stort spring med svag kontrol.
+
+  - id: regulering
+    label: "Regulatorisk underskud"
+    weight: 0.75
+    beskrivelse: >-
+      Afstanden mellem hvad teknologien gør, og hvad lovgivning og tilsyn
+      faktisk dækker. BEMÆRK RETNINGEN: høj score = stort underskud, altså
+      svag eller udhulet regulering. Ny effektiv regulering eller håndhævelse
+      SÆNKER scoren.
+
+  - id: koncentration
+    label: "Magt- og infrastrukturkoncentration"
+    weight: 0.5
+    beskrivelse: >-
+      Hvor få aktører der kontrollerer modeller, chips, datacentre og
+      distribution, og hvor afhængige samfund og virksomheder gøres af dem.
+      Høj score = stigende koncentration og afhængighed.
+
+# Faresindeks 0-100 -> bedømmelse. Første match vinder, ovenfra og ned.
+baand:
+  - id: ja
+    label: "Ja"
+    min: 65
+    tone: "hoej"
+  - id: maaske
+    label: "Måske"
+    min: 35
+    tone: "mellem"
+  - id: nej
+    label: "Nej"
+    min: 0
+    tone: "lav"

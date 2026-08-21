@@ -1,0 +1,163 @@
+{% extends "base.html.j2" %}
+
+{% block titel %}Om metoden — Er AI farligt?{% endblock %}
+{% block beskrivelse %}Hvordan vurderingen på eraifarligt.dk bliver til, hvad den ikke kan, og hvad der blev lavet om fra 2025 til 2026.{% endblock %}
+
+{% block indhold %}
+<section class="afsnit">
+  <h1>Om siden</h1>
+  <p class="broedtekst">
+    eraifarligt.dk stiller ét spørgsmål hver måned og svarer på det med ét ord.
+    Svaret bliver til automatisk: en maskine henter offentlige nyhedskilder,
+    en sprogmodel scorer måneden på seks faste risikodimensioner, og et stykke
+    almindelig kode regner scorerne om til et tal og et ord.
+  </p>
+  <p class="broedtekst">
+    Der sidder ingen ekspert bag. Det er en maskine, der læser overskrifter.
+    Det er hele pointen, og det er også hele begrænsningen.
+  </p>
+</section>
+
+<section class="afsnit">
+  <h2>2026-udgaven: sådan virker den nu</h2>
+  <ol class="trin">
+    <li>
+      <h3>Indsamling</h3>
+      <p>
+        En Python-proces henter {{ nyeste.kildestatus|length }} RSS-feeds fordelt på
+        hændelsesdatabaser, tilsynsmyndigheder, teknologijournalistik, danske medier,
+        AI-virksomhedernes egne blogs, navngivne kommentatorer og forumopslag.
+        Artiklerne filtreres til måneden, dubletter fjernes både på adresse og på
+        næsten identiske overskrifter, og hver enkelt kilde har et loft, så et stort
+        arkiv ikke kan drukne de øvrige.
+      </p>
+    </li>
+    <li>
+      <h3>Scoring</h3>
+      <p>
+        Materialet sendes i ét kald til {{ nyeste.koersel.model }}. Modellen scorer
+        hver af de seks dimensioner fra 0 til 100 og skal begrunde hver score med
+        henvisning til bestemte artikler. Henvisninger til artikler der ikke fandtes
+        i materialet bliver kasseret, og en dimension uden gyldige henvisninger
+        bliver markeret på siden.
+      </p>
+    </li>
+    <li>
+      <h3>Beregning</h3>
+      <p>
+        Faresindekset er det vægtede gennemsnit af de seks scorer. Ordet
+        <em>Ja</em>, <em>Måske</em> eller <em>Nej</em> falder ud af faste
+        grænseværdier:
+        {% for b in baand %}<strong>{{ b.label }}</strong> fra {{ b.min }}{% if not loop.last %}, {% endif %}{% endfor %}.
+        Modellen vælger ikke selv ordet, og den tæller ikke selv kilderne. Begge dele
+        gør koden, så tallet kan efterregnes.
+      </p>
+    </li>
+    <li>
+      <h3>Udgivelse</h3>
+      <p>
+        Månedens resultat gemmes som en JSON-fil i projektets kodearkiv, sitet bygges
+        forfra, og alle tidligere måneder bevares på deres egen adresse. Hele kørslen
+        sker som en planlagt opgave i GitHub Actions. Fejler den, står det i loggen —
+        i modsætning til før, hvor en død proces bare efterlod den gamle side stående.
+      </p>
+    </li>
+  </ol>
+</section>
+
+<section class="afsnit">
+  <h2>De seks dimensioner</h2>
+  <dl class="dimliste">
+    {% for d in dimensioner %}
+    <dt>{{ d.label }} <span class="vaegt">vægt {{ d.weight }}</span></dt>
+    <dd>{{ d.beskrivelse }}</dd>
+    {% endfor %}
+  </dl>
+  <p class="hjaelp">
+    Bemærk retningen på <em>regulatorisk underskud</em>: en høj score betyder
+    <em>dårlig</em> regulering. Ny og virksom lovgivning trækker tallet ned.
+  </p>
+</section>
+
+<section class="afsnit">
+  <h2>2025-udgaven: sådan virkede den før</h2>
+  <p class="broedtekst">
+    Den første udgave kørte fra sommeren 2025 som en visuel n8n-arbejdsgang.
+    En månedlig udløser hentede tre RSS-feeds — TechCrunch, OpenAI's egen blog og
+    forummet r/artificial. Artiklerne blev slået sammen, klistret til én tekstblok
+    og sendt til en sprogmodel, der returnerede en bedømmelse, en forklaring og et
+    tal for antal kilder. Resultatet blev skrevet til et Google Sheet og derefter
+    lagt op som en enkelt HTML-side i et GitHub-arkiv.
+  </p>
+  <p class="broedtekst">
+    Den holdt til august 2025. Derefter stod siden stille i næsten et år uden at
+    nogen kunne se, at den var gået i stå. Det var ikke et uheld, men en direkte
+    følge af hvordan den var bygget.
+  </p>
+
+  <h3>Hvad der konkret var galt</h3>
+  <table class="sammenlign">
+    <thead><tr><th>2025</th><th>2026</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Tre feeds blev flettet parvist efter position, så den korteste feed
+            bestemte hvor meget der overhovedet blev læst, og urelaterede artikler
+            blev parret sammen.</td>
+        <td>Alle feeds lægges i én flad liste. Intet materiale kastes væk af
+            fletningen, og dubletter fjernes bevidst.</td>
+      </tr>
+      <tr>
+        <td>Antallet af kilder blev opfundet af modellen. Prompten bad den direkte
+            om at «anvende 10-20 forskellige kilder», så tallet på siden var et
+            ønske, ikke en måling.</td>
+        <td>Antal artikler og antal kilder tælles i koden. Modellen får dem aldrig
+            at vide, og kan derfor ikke pynte på dem.</td>
+      </tr>
+      <tr>
+        <td>Modellen valgte selv ordet. Resultatet blev «Måske» hver eneste gang.</td>
+        <td>Modellen scorer dimensioner. Ordet beregnes af faste grænser, så et
+            roligt materiale også kan give et roligt svar.</td>
+      </tr>
+      <tr>
+        <td>En hukommelsesbuffer gjorde hver kørsel afhængig af den forrige, så to
+            identiske måneder kunne give to forskellige svar.</td>
+        <td>Hver kørsel er statsløs. Tidligere måneder indgår kun som en synlig
+            liste over tidligere indekstal.</td>
+      </tr>
+      <tr>
+        <td>Hver kørsel overskrev forsiden. Der fandtes ingen historik på sitet.</td>
+        <td>Hver måned får sin egen adresse og bliver stående. Arkivet er en del
+            af siden.</td>
+      </tr>
+      <tr>
+        <td>Ingen henvisninger. Man kunne ikke se hvad vurderingen byggede på.</td>
+        <td>Hver dimension henviser til de artikler den bygger på, og
+            henvisningerne kontrolleres mod det faktiske materiale.</td>
+      </tr>
+      <tr>
+        <td>En død feed eller et ugyldigt svar fejlede lydløst. Siden så stadig
+            rigtig ud.</td>
+        <td>Kildestatus vises på hver månedsside, og en fejlet kørsel markeres
+            som fejlet i stedet for at efterlade det gamle svar.</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="afsnit" id="data">
+  <h2>Hvad du ikke skal bruge siden til</h2>
+  <ul class="forbehold">
+    <li>Det er en sprogmodels læsning af overskrifter, ikke en risikoanalyse.</li>
+    <li>Kilderne er overvejende engelsksprogede og amerikanske. Det farver billedet.</li>
+    <li>Nyhedsmedier skriver om det usædvanlige. Indekset måler derfor lige så meget
+        opmærksomhed som fare.</li>
+    <li>Vægtene i formlen er valgt af et menneske efter skøn. Andre vægte giver andre tal.</li>
+    <li>Et enkelt tal kan ikke rumme spørgsmålet. Det er en samtalestarter, ikke et svar.</li>
+  </ul>
+  <p class="broedtekst">
+    Alle månedsfiler ligger som rå JSON i projektets kodearkiv sammen med kildelisten,
+    vægtene, grænseværdierne og selve prompten. Hver månedsside oplyser modelnavn og
+    prompt-hash, så det kan efterprøves hvilken opskrift der lå bag netop det tal.
+  </p>
+</section>
+{% endblock %}
