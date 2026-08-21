@@ -246,3 +246,55 @@ pool selection, verdict maths, and a full 5-month demo site render.
 
 ~25K input / ~4K output tokens per month on `claude-opus-5` ($5/$25 per MTok)
 ≈ **$0.22 per run**, ≈ $2.70/year. The daily harvest costs nothing.
+
+---
+
+## 2026-08-21 — Session 1, part 4: First real run
+
+`ANTHROPIC_API_KEY` was set with `setx` (Windows user registry). Note for future
+sessions: Claude Code's tool shells do **not** inherit it, because Claude Code
+started before `setx` ran. Pull it per command with
+`export ANTHROPIC_API_KEY=$(powershell -NoProfile -Command "[Environment]::GetEnvironmentVariable('ANTHROPIC_API_KEY','User')" | tr -d '\r')`.
+
+### Result — juli 2026
+
+| | |
+|---|---|
+| Verdict | **Måske** |
+| Faresindeks | **53.8** / 100 |
+| Grundlag | 41 artikler fra 9 kilder (tynd pulje — kun én dags høst) |
+| Tokens | 11 049 ind / 5 087 ud |
+| Kostpris | ~$0.18 |
+| Prompt-hash | `49d75772362f05f1` |
+| Valideringsadvarsler | **ingen** — hver eneste kildehenvisning fandtes i materialet |
+
+Dimensionsscorer: skader 61 · kapabilitet 62 · koncentration 57 ·
+regulering 54 · arbejdsmarked 44 · misinformation 41.
+
+### What the output shows about the design
+
+- **Citations held up.** Zero invalid article ids across 29 references. The
+  validation layer had nothing to strip, which is the outcome we wanted but not
+  the one we could assume.
+- **The scores spread.** 41 to 62, not six near-identical numbers. The "always
+  Måske" failure of 2025 came from asking the model for the word; asking for
+  dimensions and computing the word gives visible internal disagreement even
+  when the headline lands in the middle band.
+- **Danish sources earned their place.** The most concrete documented harm in the
+  month was Sundhedsdatastyrelsen accidentally granting a US AI tool access to
+  internal data — from Version2. A 2025-style three-feed setup would never have
+  seen it.
+- **The `modvaegt` field is doing real work.** The model argued against its own
+  verdict on source-credibility grounds: much of the month's drama came from
+  named commentators and vendor posts rather than independently verified harm.
+  That is exactly the self-criticism the page needs in order to be honest.
+
+### Still open
+
+- Repo is local only. Not pushed, Pages not configured, domain still on
+  `ai-verdict-site`.
+- July's verdict rests on 41 articles because the pool only has one day of
+  harvesting behind it. Once the daily job has run for a full month the figure
+  should land near the 140 cap. Worth re-running July with `--overskriv` after
+  a few weeks of harvest to see how much the thin pool distorted it.
+- No unit tests yet.
